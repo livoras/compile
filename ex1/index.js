@@ -48,7 +48,7 @@ function parse (input) {
     } else {
       match(last)
     }
-    console.log(stack, 'stack')
+    // console.log(stack, 'stack')
   }
   if (stack.length !== 0 && tokens.end()) {
     error('parse errors!')
@@ -70,6 +70,8 @@ function B () {
     stack.push(']', 'K', 'S')
   } else if (tokens.isID()) {
     stack.push(']', 'K', 'id')
+  } else if (tokens.token === ']') {
+    stack.push(']')
   } else {
     error('parse error in B')
   }
@@ -93,7 +95,7 @@ function C () {
   if (tokens.token === '[') {
     stack.push('K', 'S')
   } else if (tokens.isID()) {
-    stack.push('id')
+    stack.push('K', 'id')
   } else {
     error('parse in C')
   }
@@ -114,12 +116,16 @@ function error (msg) {
 }
 
 var specs = [
-  '[a, b, c, d]'//,
-  //'[[a, b, c], [a, b], [b, a], a, b, [a]]',
-  //'[a, [], [a]]'
+  '[]',
+  '[a]',
+  '[a, b, c, d]',
+  '[[a, b, c], [a, b], [b, a], a, b, [a]]',
+  '[a, [], [a]]',
+  '[a, [], c, [a]]'
 ]
 
 specs.forEach(function (spec) {
+  console.log('============== starting ==============', spec)
   parse(spec);
   console.log('Passing ' + spec);
 })
