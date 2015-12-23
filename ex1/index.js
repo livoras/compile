@@ -47,9 +47,9 @@ function parse (input) {
     } else {
       match(last)
     }
-    console.log(stack, 'stack')
+    // console.log(stack, 'stack')
   }
-  if (stack.length !== 0 && tokens.end()) {
+  if (stack.length !== 0 || !tokens.end()) {
     error('parse errors!')
   }
 }
@@ -68,7 +68,7 @@ function K () {
   if (tokens.isID()) {
     stack.push(']', 'A', 'id')
   } else if (tokens.token === '[' || tokens.token === ',' || tokens.token === ']') {
-    stack.push(']', 'B', 'A')
+    stack.push(']', 'A', 'B')
   } else {
     error('parse error in K')
   }
@@ -129,6 +129,7 @@ var specs = [
   '[[a, b, c], [a, b], [b, a], a, b, [a]]',
   '[a, [], [a]]',
   '[a, [], c, [a]]',
+  '[, a, b]',
   '[[[[], [a, [[[b]]]]]]]]]]]]]]]]]]]]]]]]a, b,]'
 ]
 
