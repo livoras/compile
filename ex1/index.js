@@ -11,9 +11,6 @@ function tokenizer (str) {
     i: 0,
     tokens: tokens,
     token: tokens[0],
-    peekToken: function () {
-      return tokens[this.i + 1]
-    },
     nextToken: function () {
       this.token = tokens[++this.i]
       return this.token
@@ -41,6 +38,8 @@ function parse (input) {
       B()
     } else if (last === 'K') {
       K()
+    } else if (last === 'A') {
+      A()
     } else if (last === 'C') {
       C()
     } else if (last.match(/[a-z]/)) {
@@ -48,7 +47,7 @@ function parse (input) {
     } else {
       match(last)
     }
-    // console.log(stack, 'stack')
+    console.log(stack, 'stack')
   }
   if (stack.length !== 0 && tokens.end()) {
     error('parse errors!')
@@ -58,44 +57,52 @@ function parse (input) {
 function S () {
   stack.pop()
   if (tokens.token === '[') {
-    stack.push('B', '[')
+    stack.push('K', '[')
   } else {
     error('Not match [ in S')
+  }
+}
+
+function K () {
+  stack.pop()
+  if (tokens.isID()) {
+    stack.push(']', 'A', 'id')
+  } else if (tokens.token === '[' || tokens.token === ',' || tokens.token === ']') {
+    stack.push(']', 'B', 'A')
+  } else {
+    error('parse error in K')
   }
 }
 
 function B () {
   stack.pop()
   if (tokens.token === '[') {
-    stack.push(']', 'K', 'S')
-  } else if (tokens.isID()) {
-    stack.push(']', 'K', 'id')
-  } else if (tokens.token === ']') {
-    stack.push(']')
+    stack.push('S')
+  } else if (tokens.token === ',' || tokens.token === ']') {
+    // do nothing
   } else {
     error('parse error in B')
   }
 }
 
-function K () {
+function A () {
   stack.pop()
-  if (tokens.token === ']') {
-    // do nothing
-  } else if (tokens.isID()) {
-    stack.push('id')
-  } else if (tokens.token === ',') {
+  if (tokens.token === ',') {
     stack.push('C', ',')
+  } else if (tokens.token === ']') {
+    // do nothing
   } else {
-    error('parse error in K')
+    error('parse error in A')
   }
 }
+
 
 function C () {
   stack.pop()
   if (tokens.token === '[') {
-    stack.push('K', 'S')
+    stack.push('A', 'S')
   } else if (tokens.isID()) {
-    stack.push('K', 'id')
+    stack.push('A', 'id')
   } else {
     error('parse in C')
   }
@@ -121,7 +128,8 @@ var specs = [
   '[a, b, c, d]',
   '[[a, b, c], [a, b], [b, a], a, b, [a]]',
   '[a, [], [a]]',
-  '[a, [], c, [a]]'
+  '[a, [], c, [a]]',
+  '[[[[], [a, [[[b]]]]]]]]]]]]]]]]]]]]]]]]a, b,]'
 ]
 
 specs.forEach(function (spec) {
