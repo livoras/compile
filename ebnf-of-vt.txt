@@ -1,0 +1,117 @@
+```
+1.  Pieces -> Stmt Pieces | Stmt
+2.  Stmt -> IfStmt | EachStmt | Node
+3.  IfStmt -> '{if' tk_expr '}' [Pieces] {'{else if' tk_expr '}' [Pieces]} ['{else}' [Pieces]] '{/if}'
+4.  EachStmt -> '{each' tk_expr 'as' tk_expr [',' tk_expr] '}' [Pieces] '{/each}'
+
+6.  Node -> Tag | tk_text
+7.  Tag -> '<' TagName [Attrs] ('/>' | '>' [Pieces] '<' TagName '/>')
+8.  TagName -> (tk_word | tk_inter)
+
+10. Attrs -> Attr_stmt Attrs | Attr_stmt
+11. Attr_stmt -> Attr_if | Attr_each | tk_attr_str | tk_inter 
+12. Attr_if -> '{if' tk_expr '}' [Attrs] {'{else if' tk_expr '}' [Attrs]} ['{else}' [Attrs]] '{/if}'
+13. Attr_each -> '{each' tk_expr [',' tk_expr] '}' [Attrs] '{/each}'
+
+/* sholud concat all '<', '/>' when not in right contet of '/>', '<' */
+tk_text -> /^[^\<\{]|[^\<\{]$/
+tk_inter -> '/{^(each\s|if\s)[\s\S]+?}/'
+tk_expr -> arbitary string
+tk_word
+tk_attr_str -> string doesn't start with '{' and doesn't end with '{' or '/>' or in (single, double) quote.
+
+//////////////////////////////////////////////////////////////////////////////////////////// 
+
+1.  Pieces -> Stmt Pieces | Stmt
+
+  Pieces -> Stmt Pieces_tail
+    FIRST = FIRST(Stmt) = {'{if', '{each', '<', tk_text}
+
+  Pieces_tail -> Pieces | epsilon
+    FIRST = FIRST(Stmt) + epsilon = {'{if', '{each', '<', tk_text, epsilon}
+
+
+* * *
+
+                          FIRST
+2.  Stmt -> IfStmt        {'{if'}
+          | EachStmt      {'{each'}
+          | NodesList     {'<', tk_text}
+
+  FIRST = {'{if', '{each', '<', tk_text}
+
+* * *
+3.  IfStmt -> '{if' tk_expr '}' [Pieces] {'{else if' tk_expr '}' [Pieces]} ['{else}' [Pieces]] '{/if}'
+
+  IfStmt -> '{if' tk_expr '}' Inner_Piceces ElseIfs Else '{/if}'
+    FIRST = {'{if'}
+
+  ElseIfs -> ElseIf ElseIf_tail | eplison
+    FIRST = FIRST(ElseIf) + eplison = {'{else if', eplison}
+
+  ElseIf_tail -> ElseIfs | eplison
+    FIRST = FIRST(ElseIfs) + eplison = {'{else if', eplison}
+
+  ElseIf -> '{else if' tk_expr '}' Inner_Piceces | eplison
+    FIRST = {'{else if', eplison}
+
+  Inner_Piceces -> Pieces | epsilon
+    FIRST = FIRST(Pieces) + eplison = {'{if', '{each', '<', tk_text, eplison}
+
+  Else -> '{else}' Inner_Pieces | epsilon
+    FIRST = {'{else}'}
+
+* * *
+4.  EachStmt -> '{each' tk_expr 'as' tk_expr [',' tk_expr] '}' [Pieces] '{/each}'
+
+  EachStmt -> '{each' tk_expr 'as' tk_expr Each_item '}' Inner_Pieces '{/each}'
+  Each_item -> ',' tk_expr | epsilon
+
+* * *
+5.  NodesList -> Node Nodes_tail
+
+  NodesList -> Node Nodes_tail
+    FIRST = FIRST(Node) = {}
+
+  Nodes_tail -> Node | epsilon
+    FIRST = FIRST(Node) = 
+
+* * *
+6.  Node -> Tag | tk_text
+  FIRST = FIRST(Tag) + tk_text = {'<', tk_text}
+
+* * *
+7.  Tag -> '<' TagName [Attrs] ('/>' | '>' [Pieces] '<' TagName '/>')
+
+  Tag -> '<' TagName Attrs_pieces Tag_tail
+  Attrs_pieces -> Attrs | epsilon
+  Tag_tail -> '/>' | '>' Inner_Pieces '<' TagName '/>'
+
+* * *
+8.  TagName -> (tk_word | tk_inter)
+
+* * *
+10. Attrs -> Attr_stmt Attrs | Attr_stmt
+  
+  Attrs -> Attr_stmt Attrs_tail
+  Attrs_tail -> Attrs | epsilon
+
+* * *
+11. Attr_stmt -> Attr_if | Attr_each | tk_attr_str | tk_inter 
+
+* * *
+12. Attr_if -> '{if' tk_expr '}' [Attrs] {'{else if' tk_expr '}' [Attrs]} ['{else}' [Attrs]] '{/if}'
+
+  AttrIfStmt -> '{if' tk_expr '}' Attr_stmt_inner AttrElseIfs AttrElse '{/if}'
+  AttrElseIfs -> AttrElseIf AttrElseIf_tail | eplison
+  AttrElseIf_tail -> AttrElseIfs | eplison
+  AttrElseIf -> '{else if' tk_expr '}' Attrs_stmt_inner | epsilon
+  Attrs_stmt_inner -> Attrs | epsilon
+  AttrElse -> '{else}' Attrs_stmt_inner | epsilon
+
+* * *
+13. Attr_each -> '{each' tk_expr [',' tk_expr] '}' [Attrs] '{/each}'
+
+  Attr_each -> '{each' tk_expr Each_item '}' Attrs_stmt_inner '{/each}'
+
+```
