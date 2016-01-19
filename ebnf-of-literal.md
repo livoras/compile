@@ -6,7 +6,7 @@ Obj -> '{' [Pairs] '}'
 Pairs -> KeyValue {',' KeyValue}
 KeyValue -> Key ':' Value
 Key -> id|string
-Value -> Obj|Arr|string|id
+Value -> Obj|Arr|id|string
 Arr -> '[' [Items] ']'
 Items -> Value {',' Value}
 ```
@@ -23,9 +23,9 @@ Pairs' -> Pairs | e
 Pairs -> KeyValue PairsTail
 PairsTail -> ',' KeyValue PairsTail| e
 
-KeyValue -> id ':' Value
+KeyValue -> Key ':' Value
 Key -> id|string
-Value -> Obj|Arr|string|id
+Value -> Obj|Arr|id|string
 
 Arr -> '[' Items' ']'
 Items' -> Items|e
