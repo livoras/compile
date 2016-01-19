@@ -4,8 +4,10 @@ EBNF:
 S -> Obj|Arr
 Obj -> '{' [Pairs] '}'
 Pairs -> KeyValue {',' KeyValue}
-KeyValue -> id ':' Value
-Value -> Obj|Arr|id
+KeyValue -> Key ':' Value
+Key -> id|String
+String -> '"' \s\S+? '"'
+Value -> Obj|Arr|String|id
 Arr -> '[' [Items] ']'
 Items -> Value {',' Value}
 ```
@@ -23,7 +25,9 @@ Pairs -> KeyValue PairsTail
 PairsTail -> ',' KeyValue PairsTail| e
 
 KeyValue -> id ':' Value
-Value -> Obj|Arr|id
+Key -> id|String
+String -> '"' \s\S+? '"'
+Value -> Obj|Arr|String|id
 
 Arr -> '[' Items' ']'
 Items' -> Items|e
