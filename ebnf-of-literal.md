@@ -20,7 +20,6 @@ S -> Obj|Arr
 
 Obj -> '{' Pairs' '}'
     first = '{'
-    follow = $, ',', '}'
    
 Pairs' -> Pairs | e
     first = id, string
