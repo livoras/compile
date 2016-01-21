@@ -28,7 +28,6 @@ Pairs' -> Pairs | e
     
 Pairs -> KeyValue PairsTail
     first = id, string
-    follow = '}'
     
 PairsTail -> ',' KeyValue PairsTail| e
     first = ','
@@ -36,19 +35,23 @@ PairsTail -> ',' KeyValue PairsTail| e
     
 KeyValue -> Key ':' Value
     first = id, string
-    follow = ',', '}'
     
 Key -> id|string
 
 Value -> Obj|Arr|id|string
     first = '{', '[', id, string
-    follow = ',', '}'
 
 Arr -> '[' Items' ']'
     first = '['
-    follow = $, ',', '}'
     
 Items' -> Items|e
+    first = '{', '[', id, string
+    follow = ']'
+    
 Items -> Value ItemsTail
+    first = '{', '[', id, string
+    
 ItemsTail -> ',' Value ItemsTail|e
+    first = ','
+    follow = ']'
 ```
