@@ -54,3 +54,16 @@ ItemsTail -> ',' Value ItemsTail|e
     first = ','
     follow = ']'
 ```
+
+Tokens
+```
+TK_LEFT_BRACE : '{'
+TK_RIGHT_BRACE : '}'
+TK_ID : ^[\w_][\w\d_]?
+TK_STRING : \"[\S\s]?+\"
+TK_LEFT_BRACKET : '['
+TK_RIGHT_BRACKET : ']'
+TK_COMMA : ','
+TK_EOF : $
+
+```
