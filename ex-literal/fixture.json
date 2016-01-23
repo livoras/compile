@@ -1,0 +1,34 @@
+  {
+  "name": "Lucy",
+  "age": "12",
+  girls: [
+    {
+      name: "Lily",
+      age: 13
+    },
+    {
+      name: "Amy",
+      age: 15
+    }
+  ], 
+  good: [
+    "33",
+    "43",
+    {
+      type: what
+    },
+    {
+      type: are
+    },
+    doing,
+    [
+      [[
+        {name: "shi"}
+      ]], {
+        desc: "complicated?"
+      }, 
+      nonono, 
+      "not yet!"
+    ]
+  ]
+}
