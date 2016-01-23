@@ -64,6 +64,7 @@ TK_STRING : \"[\S\s]?+\"
 TK_LEFT_BRACKET : '['
 TK_RIGHT_BRACKET : ']'
 TK_COMMA : ','
+TK_COLON : ':'
 TK_EOF : $
 
 ```
