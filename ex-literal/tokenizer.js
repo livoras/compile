@@ -2,15 +2,6 @@ var types = require('./types')
 var fs = require('fs')
 var str = fs.readFileSync(__dirname + '/fixture.json', 'utf-8')
 
-// TK_LEFT_BRACE : '{'
-// TK_RIGHT_BRACE : '}'
-// TK_ID : ^[\w_][\w\d_]?
-// TK_STRING : \"[\S\s]?+\"
-// TK_LEFT_BRACKET : '['
-// TK_RIGHT_BRACKET : ']'
-// TK_COMMA : ','
-// TK_EOF : $
-
 function Tokenizer (str) {
   this.index = 0
   this.eof = false
@@ -64,10 +55,10 @@ pp.readRightBrace = function () {
 }
 
 pp.readID = function () {
-  if (this.input[this.index].match(/[\w_]/)) {
+  if (this.input[this.index].match(/[a-zA-Z_]/)) {
     var start = this.index
     this.index++
-    while(this.input[this.index].match(/[\w\d_]/)) {
+    while(this.input[this.index].match(/[a-zA-Z\d_]/)) {
       this.index++
     }
     return {
@@ -87,7 +78,7 @@ pp.readString = function () {
     this.index++
     return {
       type: types.TK_STRING,
-      label: this.input.slice(start, this.index)
+      label: this.input.slice(start + 1, this.index - 1)
     }
   }
 }
@@ -146,11 +137,11 @@ pp.error = function () {
   throw new Error('Unexpected token: ' + this.input[this.index])
 }
 
-var i = 0
-var tk = new Tokenizer(str)
-
-while (!tk.eof) {
-  console.log(tk.nextToken())
+pp.peekToken = function () {
+  var index = this.index
+  var token = this.nextToken()
+  this.index = index
+  return token
 }
 
 module.exports = Tokenizer
