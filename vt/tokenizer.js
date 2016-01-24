@@ -55,9 +55,9 @@ pp.peekToken = function () {
   return token
 }
 
-pp.error = function () {
-  throw new Error('Unexpected token: ' + this.char())
-}
+/*
+ * Read token one by one
+ */
 
 pp.readTagName = function () {
   if (this.char() === '<') {
@@ -210,6 +210,10 @@ pp.readEOF = function () {
   }
 }
 
+/* 
+ * Helpers Functions
+ */
+
 pp.eatSpaces = function () {
   while (/\s/.test(this.char())) {
     this.index++
@@ -246,6 +250,10 @@ pp.test = function () {
   while(!this.eof) {
     console.log(this.nextToken())
   }
+}
+
+pp.error = function () {
+  throw new Error('Unexpected token: ' + this.char())
 }
 
 function isUndefined (value) {

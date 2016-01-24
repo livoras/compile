@@ -19,16 +19,48 @@ Value -> '=' string|e
 
 Tokens:
 
-TK_TEXT
-TK_IF
-TK_END_IF
-TK_ELSE_IF
-TK_ELSE
-TK_EACH
-TK_END_EACH
-TK_GT
-TK_SLASH_GT
-TK_TAG_NAME
-TK_ATTR_NAME
-TK_EQUAL
-TK_ATTR_STRING
+  TK_TEXT: 1,
+  TK_IF: 2,
+  TK_END_IF: 3,
+  TK_ELSE_IF: 4,
+  TK_ELSE: 5,
+  TK_EACH: 6,
+  TK_END_EACH: 7,
+  TK_GT: 8,
+  TK_SLASH_GT: 9,
+  TK_TAG_NAME: 10,
+  TK_ATTR_NAME: 11,
+  TK_ATTR_EQUAL: 12,
+  TK_ATTR_STRING: 13,
+  TK_CLOSE_TAG: 13,
+  TK_EOF: 100
+
+AST:
+
+Stat: {
+    type: 'Stat'
+    members: [IfStat, EachStat, Node, text]
+}
+
+IfStat: {
+    label: string,
+    body: Stat
+    elifs: [ElseIf, ...]
+    elsebody: Stat
+}
+
+ElseIf: {
+    label: string,
+    body: Stat
+}
+
+EachStat: {
+    label: string,
+    body: Stat
+}
+
+Node: {
+    name: string,
+    attributes: object,
+    body: Stat
+}
