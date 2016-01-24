@@ -1,10 +1,18 @@
 Stat -> Frag Stat|e
-Frag -> IfStat|EachStat|Node|Text
+Frag -> IfStat|EachStat|Node|text
 
-IfStat -> if Stat {ElseIfs} [Else] '{/if}'
+IfStat -> if Stat ElseIfs' Else '{/if}'
+ElseIfs' -> ElseIfs ElseIfs'|e
 ElseIfs -> elseif Stat
-Else -> '{else}' Stat
+Else -> '{else}' Stat|e
 
 EachStat -> each Stat '{/each}'
 
-Node -> 
+Node -> OpenTag NodeTail
+NodeTail -> '>' Stat closeTag
+          | '/>'
+      
+OpenTag -> tagName Attrs '>'
+
+Attrs -> Attr Attrs|e 
+Attr -> name ['=' string]
