@@ -1,5 +1,6 @@
 var Tokenizer = require('./tokenizer')
 var types = require('./tokentypes')
+var util = require('util')
 
 // TK_TEXT: 1,
 // TK_IF: 2,
@@ -19,7 +20,8 @@ var types = require('./tokentypes')
 
 function Parser (input) {
   this.tokens = new Tokenizer(input)
-  this.parse()
+  var root = this.parse()
+  console.log(util.inspect(root, false, null))
 }
 
 var pp = Parser.prototype
@@ -30,23 +32,32 @@ pp.is = function (type) {
 
 pp.parse = function () {
   this.tokens.index = 0
-  this.parseStat()
+  var root = this.parseStat()
   this.eat(types.TK_EOF)
-  console.log('Successfully parsed!');
+  console.log('Successfully parsed!')
+  return root
 }
 
 pp.parseStat = function () {
+  var stat = {
+    type: 'Stat',
+    members: []
+  }
   if (
     this.is(types.TK_IF) ||
     this.is(types.TK_EACH) ||
     this.is(types.TK_TAG_NAME) ||
     this.is(types.TK_TEXT)
   ) {
-    this.parseFrag()
-    this.parseStat()
+    stat.members.push(this.parseFrag())
+    stat.members.push.apply(
+      stat.members,
+      this.parseStat().members
+    )
   } else {// TODO: Follow check
     // end
   }
+  return stat
 }
 
 pp.parseFrag = function () {
@@ -62,42 +73,59 @@ pp.parseFrag = function () {
 }
 
 /*
- * IfStat -> if Stat ElseIfs' Else '{/if}'
+ * IfStat -> if Stat ElseIfs Else '{/if}'
  */
 
 pp.parseIfStat = function () {
+  var token = this.tokens.peekToken()
+  var ifStat = {
+    type: 'IfStat',
+    label: token.label
+  }
   this.eat(types.TK_IF)
-  this.parseStat()
-  this.parseElseIfsPrimer()
-  this.parseElse()
+  ifStat.body = this.parseStat()
+  ifStat.elseifs = this.parseElseIfs()
+  ifStat.elsebody = this.parseElse()
   this.eat(types.TK_END_IF)
+  return ifStat
 }
 
 /*
- * ElseIfs' -> ElseIfs ElseIfs'|e
+ * ElseIfs -> ElseIf ElseIfs|e
  */
 
-pp.parseElseIfsPrimer = function () {
+pp.parseElseIfs = function () {
+  var elseifs = []
   if (this.is(types.TK_ELSE_IF)) {
-    this.parseElseIfs()
-    this.parseElseIfsPrimer()
+    elseifs.push(this.parseElseIf())
+    elseifs.push.apply(
+      elseifs,
+      this.parseElseIfs()
+    )
   } else if (
     this.is(types.TK_ELSE) ||
     this.is(types.TK_END_IF)
   ) {
     // do nothing
   } else {
-    this.parseError('parseElseIfsPrimer')
+    this.parseError('parseElseIfs')
   } 
+  return elseifs
 }
 
 /*
  * ElseIfs -> elseif Stat
  */
 
-pp.parseElseIfs = function () {
+pp.parseElseIf = function () {
+  var token = this.tokens.peekToken()
+  var elseif = {
+    type: 'ElseIf',
+    label: token.label
+  }
   this.eat(types.TK_ELSE_IF)
-  this.parseStat()
+  elseif.body = this.parseStat()
+  return elseif
 }
 
 /*
@@ -107,7 +135,7 @@ pp.parseElseIfs = function () {
 pp.parseElse = function () {
   if (this.is(types.TK_ELSE)) {
     this.eat(types.TK_ELSE)
-    this.parseStat()
+    return this.parseStat()
   } else if (
     this.is(types.TK_END_IF) 
   ) {
@@ -122,9 +150,14 @@ pp.parseElse = function () {
  */
 
 pp.parseEachStat = function () {
-  this.eat(types.TK_EACH)
-  this.parseStat()
+  var eachStat = {
+    type: 'EachStat'
+  }
+  var token = this.eat(types.TK_EACH)
+  eachStat.label = token.label
+  eachStat.body = this.parseStat()
   this.eat(types.TK_END_EACH)
+  return eachStat
 }
 
 /*
@@ -132,17 +165,23 @@ pp.parseEachStat = function () {
  */
 
 pp.parseNode = function () {
-  this.parseOpenTag()
-  this.parseNodeTail()
+  var token = this.tokens.peekToken()
+  var node = {
+    type: 'Node',
+    name: token.label
+  }
+  this.parseOpenTag(node)
+  this.parseNodeTail(node)
+  return node
 }
 
 /*
  * OpenTag -> tagName Attrs
  */
 
-pp.parseOpenTag = function () {
+pp.parseOpenTag = function (node) {
   this.eat(types.TK_TAG_NAME)
-  this.parseAttrs()
+  node.attributes = this.parseAttrs()
 }
 
 /*
@@ -150,10 +189,10 @@ pp.parseOpenTag = function () {
  *           | '/>'
  */
 
-pp.parseNodeTail = function () {
+pp.parseNodeTail = function (node) {
   if (this.is(types.TK_GT)) {
     this.eat(types.TK_GT)
-    this.parseStat()
+    node.body = this.parseStat()
     this.eat(types.TK_CLOSE_TAG)
   } else if (this.is(types.TK_SLASH_GT)) {
     this.eat(types.TK_SLASH_GT)
@@ -163,9 +202,10 @@ pp.parseNodeTail = function () {
 }
 
 pp.parseAttrs = function () {
+  var attrs = {}
   if (this.is(types.TK_ATTR_NAME)) {
-    this.parseAttr()
-    this.parseAttrs()
+    extend(attrs, this.parseAttr())
+    extend(attrs, this.parseAttrs())
   } else if (
     this.is(types.TK_GT) ||
     this.is(types.TK_SLASH_GT)
@@ -174,11 +214,15 @@ pp.parseAttrs = function () {
   } else {
     this.parseError('parseAttrs')
   }
+  return attrs
 }
 
 pp.parseAttr = function () {
-  this.eat(types.TK_ATTR_NAME)
-  this.parseValue()
+  var attr = {}
+  var token = this.eat(types.TK_ATTR_NAME)
+  var value = this.parseValue()
+  attr[token.label] = value
+  return attr
 }
 
 pp.parseValue = function () {
@@ -186,7 +230,8 @@ pp.parseValue = function () {
     this.is(types.TK_ATTR_EQUAL)
   ) {
     this.eat(types.TK_ATTR_EQUAL)
-    this.eat(types.TK_ATTR_STRING)
+    var token = this.eat(types.TK_ATTR_STRING)
+    return token.label
   } else if (
     this.is(types.TK_GT) ||
     this.is(types.TK_SLASH_GT) ||
@@ -213,6 +258,14 @@ pp.eat = function (type) {
     this.error('expect token type ' + type + ', but got ' + token.type)
   }
   return token
+}
+
+function extend (src, dest) {
+  for (var key in dest) {
+    if (dest.hasOwnProperty(key)) {
+      src[key] = dest[key]
+    }
+  }
 }
 
 module.exports = Parser

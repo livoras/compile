@@ -17,6 +17,8 @@ Attrs -> Attr Attrs|e
 Attr -> name Value
 Value -> '=' string|e
 
+**************************************
+
 Tokens:
 
   TK_TEXT: 1,
@@ -35,6 +37,8 @@ Tokens:
   TK_CLOSE_TAG: 13,
   TK_EOF: 100
 
+**************************************
+
 AST:
 
 Stat: {
@@ -43,6 +47,7 @@ Stat: {
 }
 
 IfStat: {
+    type: 'IfStat'
     label: string,
     body: Stat
     elifs: [ElseIf, ...]
@@ -50,16 +55,19 @@ IfStat: {
 }
 
 ElseIf: {
+    type: 'ElseIf'
     label: string,
     body: Stat
 }
 
 EachStat: {
+    type: 'EachStat'
     label: string,
     body: Stat
 }
 
 Node: {
+    type: 'Node'
     name: string,
     attributes: object,
     body: Stat
