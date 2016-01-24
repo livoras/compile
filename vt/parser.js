@@ -20,8 +20,6 @@ var util = require('util')
 
 function Parser (input) {
   this.tokens = new Tokenizer(input)
-  var root = this.parse()
-  console.log(util.inspect(root, false, null))
 }
 
 var pp = Parser.prototype
