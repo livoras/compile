@@ -1,4 +1,5 @@
 var Parser = require('./parser')
+var util = require('util')
 var fs = require('fs')
 var str = fs.readFileSync('./fixtures/test1.html', 'utf-8')
 var str2 = fs.readFileSync('./fixtures/test2.html', 'utf-8')

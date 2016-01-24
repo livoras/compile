@@ -1,6 +1,5 @@
 var Tokenizer = require('./tokenizer')
 var types = require('./tokentypes')
-var util = require('util')
 
 // TK_TEXT: 1,
 // TK_IF: 2,
@@ -32,7 +31,6 @@ pp.parse = function () {
   this.tokens.index = 0
   var root = this.parseStat()
   this.eat(types.TK_EOF)
-  console.log('Successfully parsed!')
   return root
 }
 
