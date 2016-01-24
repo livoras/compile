@@ -254,7 +254,7 @@ pp.test = function () {
 }
 
 pp.error = function () {
-  throw new Error('Unexpected token: ' + this.char())
+  throw new Error('Unexpected token: \'' + this.char() + '\'')
 }
 
 function isUndefined (value) {
