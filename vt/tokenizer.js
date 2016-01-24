@@ -188,6 +188,7 @@ pp.readText = function () {
   if (!this.inContext(types.TK_TAG_NAME)) {
     var start = this.index
     if (!this.char()) return
+    this.index++
     while (
       this.char() && !(/[\<\{]/.test(this.char()))
     ) {

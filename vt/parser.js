@@ -49,15 +49,33 @@ pp.parseStat = function () {
     this.is(types.TK_TAG_NAME) ||
     this.is(types.TK_TEXT)
   ) {
-    stat.members.push(this.parseFrag())
-    stat.members.push.apply(
-      stat.members,
-      this.parseStat().members
-    )
+    pushMembers(stat.members, [this.parseFrag()])
+    pushMembers(stat.members, this.parseStat().members)
   } else {// TODO: Follow check
     // end
   }
   return stat
+}
+
+/*
+ * push stat's memeber and concat all text
+ */
+function pushMembers (target, candidates) {
+  for (var i = 0, len = candidates.length; i < len; i++) {
+    var lasIdx = target.length - 1
+    if (
+      isString(target[lasIdx]) && 
+      isString(candidates[i])
+    ) {
+      target[lasIdx] += candidates[i]
+    } else {
+      target.push(candidates[i])
+    }
+  }
+}
+
+function isString (str) {
+  return typeof str === 'string'
 }
 
 pp.parseFrag = function () {
