@@ -1,0 +1,10 @@
+Stat -> Frag Stat|e
+Frag -> IfStat|EachStat|Node|Text
+
+IfStat -> if Stat {ElseIfs} [Else] '{/if}'
+ElseIfs -> elseif Stat
+Else -> '{else}' Stat
+
+EachStat -> each Stat '{/each}'
+
+Node -> 
