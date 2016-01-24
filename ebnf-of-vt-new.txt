@@ -11,8 +11,8 @@ EachStat -> each Stat '{/each}'
 Node -> OpenTag NodeTail
 NodeTail -> '>' Stat closeTag
           | '/>'
-      
-OpenTag -> tagName Attrs '>'
+OpenTag -> tagName Attrs
 
 Attrs -> Attr Attrs|e 
-Attr -> name ['=' string]
+Attr -> name Value
+Value -> '=' string|e
