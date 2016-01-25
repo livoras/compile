@@ -1,0 +1,29 @@
+<div class="container">
+  {if isAdmin}
+    <div id="admin">
+      <div>Admin Header</div>
+    </div>
+  {else ifCustomer}
+    <div id="curstomer">
+      <h1>Curstomer Header</h1>
+    </div>
+  {else}
+    <div class="no-data">No data!</div>
+  {/if}
+
+  <ul class="user-list">
+    {each users as user i}
+      <li class="user-item">
+        <h2>#{i} - {user.name}</h2>
+        <div>
+          {if user.isVIP}
+            This is a VIP USER@
+          {/if}
+          <span>Desc</span>
+          <img src="/avatars/{user.id}" alt="{user.name}"/>
+          <div class="user-desc">{user.desc}</div>
+        </div>
+      </li>
+    {/each}
+  </ul>
+</div>

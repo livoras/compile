@@ -1,0 +1,15 @@
+{
+  "name": "vt-parser",
+  "version": "0.0.1",
+  "description": "Virtual-Template DSL",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "npm test",
+    "dev": "nodemon --exec mocha"
+  },
+  "author": "Livoras",
+  "license": "MIT"
+}
