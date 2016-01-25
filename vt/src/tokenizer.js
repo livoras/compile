@@ -151,35 +151,35 @@ pp.readIF = function () {
 
 pp.readElse = function () {
   return this.captureByRegx(
-    /^\{\s*?else\s*?\}/,
+    /^\{\s*else\s*\}/,
     types.TK_ELSE
   )
 }
 
 pp.readElseIf = function () {
   return this.captureByRegx(
-    /^\{\s*?else\s*?if\s*?[\S\s]+?\}/,
+    /^\{\s*elseif\s*[\S\s]+?\}/,
     types.TK_ELSE_IF
   )
 }
 
 pp.readEndIf = function () {
   return this.captureByRegx(
-    /^\{\s*?\/if\s*?\}/,
+    /^\{\s*\/if\s*\}/,
     types.TK_END_IF
   )
 }
 
 pp.readEach = function () {
   return this.captureByRegx(
-    /^\{\s*?each\s[\S\s]*?\}/,
+    /^\{\s*each\s*[\S\s]*?\}/,
     types.TK_EACH
   )
 }
 
 pp.readEndEach = function () {
   return this.captureByRegx(
-    /^\{\s*?\/each\s*?\}/,
+    /^\{\s*\/each\s*\}/,
     types.TK_END_EACH
   )
 }
