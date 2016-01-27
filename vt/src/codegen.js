@@ -1,91 +1,122 @@
 var _ = require('./util')
 var codeGenMethods = {}
 
-function walkRoot (astRoot) {
-  var lines = []
-  walk(astRoot, lines, 0)
-  console.log(lines.join('\n'))
+function CodeGen (astRoot) {
+  this.nodeIndex = 1
+  this.lines = []
+  this.walkRoot(astRoot)
+  console.log(this.lines.join('\n'));
 }
 
-function walk (node, lines, indent) {
+var pp = CodeGen.prototype
+
+pp.walkRoot = function (astRoot) {
+  this.walk(astRoot, '  ', 0)
+}
+
+pp.walk = function (node, indent, parentIndex) {
   if (typeof node === 'string') {
-    return codeGenMethods['String'](node, lines, indent)
+    return this.genString(node, indent, parentIndex)
   } else {
-    return codeGenMethods[node.type](node, lines, indent)
+    return this['gen' + node.type](node, indent, parentIndex)
   }
 }
 
-codeGenMethods['Stat'] = function (node, lines, indent) {
+pp.genStat = function (node, indent, parentIndex) {
+  var self = this
   _.each(node.members, function (item) {
-    walk(item, lines, indent)
+    self.walk(item, indent, parentIndex)
   })
 }
 
-codeGenMethods['IfStat'] = function (node, lines, indent) {
+pp.genIfStat = function (node, indent, parentIndex) {
   // body...
   var expr = node.label.replace(/(^\{\s*if\s*)|(\s*\}$)/g, '')
-  lines.push(spaces(indent) + 'if (' + expr + ') {')
+  this.lines.push('\n' + indent + 'if (' + expr + ') {')
   if (node.body) {
-    walk(node.body, lines, inc(indent))
+    this.walk(node.body, inc(indent), parentIndex)
   }
-  // lines.push(spaces(indent) + '}')
+  // this.lines.push(indent + '}')
   if (node.elseifs) {
+    var self = this
     _.each(node.elseifs, function (elseif) {
-      walk(elseif, lines, indent)
+      self.walk(elseif, indent, parentIndex)
     })
   }
   if (node.elsebody) {
-    lines.push(spaces(indent) + '} else {')
-    walk(node.elsebody, lines, inc(indent))
+    this.lines.push(indent + '} else {')
+    this.walk(node.elsebody, inc(indent), parentIndex)
   }
-  lines.push(spaces(indent) + '}')
+  this.lines.push(indent + '}\n')
 }
 
-codeGenMethods['ElseIf'] = function (node, lines, indent) {
+pp.genElseIf = function (node, indent, parentIndex) {
   var expr = node.label.replace(/(^\{\s*else\s*if\s*)|(\s*\}$)/g, '')
-  lines.push(spaces(indent) + '} else if (' + expr + ') {')
+  this.lines.push(indent + '} else if (' + expr + ') {')
   if (node.body) {
-    walk(node.body, lines, indent + 2)
+    this.walk(node.body, inc(indent), parentIndex)
   }
-  // lines.push(spaces(indent) + '}')
+  // this.lines.push(indent + '}')
 }
 
-codeGenMethods['EachStat'] = function (node, lines, indent) {
+pp.genEachStat = function (node, indent, parentIndex) {
   var expr = node.label.replace(/(^\{\s*each\s*)|(\s*\}$)/g, '')
   var tokens = expr.split(/\s+/)
   var list = tokens[0]
   var item = tokens[2]
   var key = tokens[3]
-  lines.push(
-    spaces(indent) +
+  this.lines.push(
+    '\n' +
+    indent +
     'for (var ' + key + ' = 0, len = ' + list + '.length; i < len; i++) {'
   )
-  lines.push(spaces(inc(indent)) + 'var ' + item + ' = ' + 'list[' + key + '];')
+  this.lines.push(inc(indent) + 'var ' + item + ' = ' + 'list[' + key + '];')
   if (node.body) {
-    walk(node.body, lines, inc(indent))
+    this.walk(node.body, inc(indent), parentIndex)
   }
-  lines.push(spaces(indent) + '}')
+  this.lines.push(indent + '}\n')
 }
 
-codeGenMethods['Node'] = function (node, lines, indent) {
+pp.genNode = function (node, indent, parentIndex) {
+  var currentIndex = this.nodeIndex++
+  this.lines.push(
+    indent +
+    'var node' + 
+    currentIndex + ' = el("' + node.name + 
+    '", ' + pp.getAttrs(node) + ', []);'
+  )
+  this.lines.push(
+    indent +
+    'node' + parentIndex + '.children.push(node' + currentIndex + ')'
+  )
   if (node.body) {
-    walk(node.body, lines, indent)
+    this.walk(node.body, indent, currentIndex)
   }
 }
 
-codeGenMethods['String'] = function (node, lines, indent) {
+pp.genString = function (node, indent, parentIndex) {
+  this.lines.push(
+    indent + 'node' + parentIndex + '.children.push("' + node + '")'
+  )
+}
+
+pp.getAttrs = function (node) {
+  var str = '{'
+  var attrs = node.attributes
+  var i = 0;
+  for (var key in attrs) {
+    if (i++ != 0) {
+      str += (', ' + key + ': "' + attrs[key] + '"')
+    } else {
+      str += (key + ': "' + attrs[key] + '"')
+    }
+  }
+  str += '}'
+  return str;
 }
 
 function inc (indent) {
-  return indent + 2
+  return indent + '  '
 }
 
-function spaces (indent) {
-  var str = '';
-  for (var i = 0; i < indent; i++) {
-    str += ' '
-  }
-  return str
-}
-
-module.exports = walkRoot
+module.exports = CodeGen
