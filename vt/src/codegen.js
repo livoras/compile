@@ -28,14 +28,14 @@ codeGenMethods['IfStat'] = function (node, lines, indent) {
   if (node.body) {
     walk(node.body, lines, inc(indent))
   }
-  lines.push(spaces(indent) + '}')
+  // lines.push(spaces(indent) + '}')
   if (node.elseifs) {
     _.each(node.elseifs, function (elseif) {
       walk(elseif, lines, indent)
     })
   }
-  lines.push(spaces(indent) + 'else {')
   if (node.elsebody) {
+    lines.push(spaces(indent) + '} else {')
     walk(node.elsebody, lines, inc(indent))
   }
   lines.push(spaces(indent) + '}')
@@ -43,11 +43,11 @@ codeGenMethods['IfStat'] = function (node, lines, indent) {
 
 codeGenMethods['ElseIf'] = function (node, lines, indent) {
   var expr = node.label.replace(/(^\{\s*else\s*if\s*)|(\s*\}$)/g, '')
-  lines.push(spaces(indent) + 'else if (' + expr + ') {')
+  lines.push(spaces(indent) + '} else if (' + expr + ') {')
   if (node.body) {
     walk(node.body, lines, indent + 2)
   }
-  lines.push(spaces(indent) + '}')
+  // lines.push(spaces(indent) + '}')
 }
 
 codeGenMethods['EachStat'] = function (node, lines, indent) {
