@@ -5,13 +5,13 @@ function CodeGen (astRoot) {
   this.nodeIndex = 1
   this.lines = []
   this.walkRoot(astRoot)
-  console.log(this.lines.join('\n'));
+  this.body = this.lines.join('\n');
 }
 
 var pp = CodeGen.prototype
 
 pp.walkRoot = function (astRoot) {
-  this.walk(astRoot, '  ', 0)
+  this.walk(astRoot, '  ', '_')
 }
 
 pp.walk = function (node, indent, parentIndex) {
@@ -82,7 +82,7 @@ pp.genNode = function (node, indent, parentIndex) {
   this.lines.push(
     indent +
     'var node' + 
-    currentIndex + ' = el("' + node.name + 
+    currentIndex + ' = _el_("' + node.name + 
     '", ' + pp.getAttrs(node) + ', []);'
   )
   this.lines.push(
@@ -95,9 +95,9 @@ pp.genNode = function (node, indent, parentIndex) {
 }
 
 pp.genString = function (node, indent, parentIndex) {
-  this.lines.push(
-    indent + 'node' + parentIndex + '.children.push("' + node + '")'
-  )
+  var line = indent + 'node' + parentIndex + '.children.push("' + node + '")'
+  line = line.replace('\n', '\\n')
+  this.lines.push(line)
 }
 
 pp.getAttrs = function (node) {

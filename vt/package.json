@@ -11,5 +11,8 @@
     "dev": "nodemon --exec mocha"
   },
   "author": "Livoras",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "simple-virtual-dom": "^0.1.8"
+  }
 }
