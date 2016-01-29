@@ -70,7 +70,7 @@ pp.genEachStat = function (node, indent, parentIndex) {
     indent +
     'for (var ' + key + ' = 0, len = ' + list + '.length; i < len; i++) {'
   )
-  this.lines.push(inc(indent) + 'var ' + item + ' = ' + 'list[' + key + '];')
+  this.lines.push(inc(indent) + 'var ' + item + ' = ' + list + '[' + key + '];')
   if (node.body) {
     this.walk(node.body, inc(indent), parentIndex)
   }

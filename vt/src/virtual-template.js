@@ -10,15 +10,17 @@ vTemplate.compile = function (template) {
   return function (data) {
     var params = []
     for (var key in data) {
-      params.push(key)
+      params.push('  var ' + key + ' = ' + '_data_.' + key + ';\n')
     }
-    params.push('_el_', 'node_')
-    var renderFunc = new Function('_data_', '_el_', 'node_', code.body)
+    var body = params.join('') + code.body
+    // console.log(body)
+    var renderFunc = new Function('_data_', '_el_', 'node_', body)
     var container = svd.el('div')
     renderFunc(data, svd.el, container)
-    consolo.log(container);
+    return (container.children.length === 1)
+      ? container.children[0]
+      : container
   }
 }
 
 module.exports = vTemplate
-
