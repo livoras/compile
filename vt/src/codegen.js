@@ -64,11 +64,11 @@ pp.genEachStat = function (node, indent, parentIndex) {
   var tokens = expr.split(/\s+/)
   var list = tokens[0]
   var item = tokens[2]
-  var key = tokens[3]
+  var key = tokens[3] || getKey()
   this.lines.push(
     '\n' +
     indent +
-    'for (var ' + key + ' = 0, len = ' + list + '.length; i < len; i++) {'
+    'for (var ' + key + ' = 0, len = ' + list + '.length; ' + key + ' < len; ' + key + '++) {'
   )
   this.lines.push(inc(indent) + 'var ' + item + ' = ' + list + '[' + key + '];')
   if (node.body) {
@@ -95,7 +95,7 @@ pp.genNode = function (node, indent, parentIndex) {
 }
 
 pp.genString = function (node, indent, parentIndex) {
-  var line = indent + 'node' + parentIndex + '.children.push("' + node + '")'
+  var line = indent + 'node' + parentIndex + '.children.push(' + getInterpolation(node) + ')'
   line = line.replace('\n', '\\n')
   this.lines.push(line)
 }
@@ -105,10 +105,11 @@ pp.getAttrs = function (node) {
   var attrs = node.attributes
   var i = 0;
   for (var key in attrs) {
+    var attrStr = getInterpolation(attrs[key])
     if (i++ != 0) {
-      str += (', ' + key + ': "' + attrs[key] + '"')
+      str += (', ' + key + ': ' + attrStr)
     } else {
-      str += (key + ': "' + attrs[key] + '"')
+      str += (key + ': ' + attrStr)
     }
   }
   str += '}'
@@ -117,6 +118,30 @@ pp.getAttrs = function (node) {
 
 function inc (indent) {
   return indent + '  '
+}
+
+var keyIndex = 0
+
+function getKey () {
+  return 'key' + keyIndex++
+}
+
+function getInterpolation (node) {
+  var reg = /\{[\s\S]+?\}/g
+  var inters = node.match(reg)
+  var strs = node.split(reg)
+  if (!inters) return ['"', '"'].join(node)
+  var last = strs[strs.length - 1]
+  strs.splice(strs.length - 1, 1)
+  var ret = ''
+  _.each(strs, function (str, i) {
+    ret += ('"' + str + '" + ')
+    ret += (
+      '(' + inters[i].replace(/[\{\}]/g, '') + ') + '
+    )
+  })
+  ret += ('"' + last + '"')
+  return ret
 }
 
 module.exports = CodeGen

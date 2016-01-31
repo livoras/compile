@@ -13,7 +13,7 @@ vTemplate.compile = function (template) {
       params.push('  var ' + key + ' = ' + '_data_.' + key + ';\n')
     }
     var body = params.join('') + code.body
-    // console.log(body)
+    console.log(body)
     var renderFunc = new Function('_data_', '_el_', 'node_', body)
     var container = svd.el('div')
     renderFunc(data, svd.el, container)

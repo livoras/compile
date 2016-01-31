@@ -17,17 +17,20 @@ describe('Test for walk through the AST', function () {
             {
                 id: 1,
                 name: 'Jerry',
-                isVIP: false
+                isVIP: false,
+                desc: "I love tomy"
             },
             {
                 id: 2,
                 name: 'Tomy',
-                isVIP: true
+                isVIP: true,
+                desc: "fuck off, jerry"
             },
             {
                 id: 3,
                 name: 'Lucy',
-                isVIP: false
+                isVIP: false,
+                desc: "You both shut up!"
             }
         ]
     })
